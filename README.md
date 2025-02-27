@@ -1,2 +1,2 @@
 # ChataPP
-C++ practice
+Chat application for C++ practice/lerning.
