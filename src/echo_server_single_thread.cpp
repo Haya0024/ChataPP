@@ -25,8 +25,8 @@ class ChatSession : public std::enable_shared_from_this<ChatSession>{
         }
         
         void start() {
-            ws_.async_accept(
-                [self = shared_from_this()](error_code ec) {
+            std::shared_ptr<ChatSession> self = shared_from_this();
+            ws_.async_accept([self](error_code ec) {
                     if (!ec) {
                         self->read();
                     } else {
@@ -37,8 +37,8 @@ class ChatSession : public std::enable_shared_from_this<ChatSession>{
     
     private:
         void read() {
-            ws_.async_read(buffer_,
-                [self = shared_from_this()](error_code ec, std::size_t bytes_transferred) {
+            std::shared_ptr<ChatSession> self = shared_from_this();
+            ws_.async_read(buffer_, [self](error_code ec, std::size_t bytes_transferred) {
                     if (!ec) {
                         std::string msg = beast::buffers_to_string(self->buffer_.data());
                         std::cout << "Received: " << msg << std::endl;
@@ -51,9 +51,10 @@ class ChatSession : public std::enable_shared_from_this<ChatSession>{
         }
 
         void write(const std::string& msg) {
+            std::shared_ptr<ChatSession> self = shared_from_this();
             ws_.async_write(
                 asio::buffer(msg),
-                [self = shared_from_this()](error_code ec, std::size_t) {
+                [self](error_code ec, std::size_t) {
                     if (!ec) {
                         self->buffer_.consume(self->buffer_.size());
                         self->read();
